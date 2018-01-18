@@ -13,6 +13,7 @@ import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from .constants import *
+from .meta_vectorizer import *
 
 #from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #from nltk.stem.wordnet import WordNetLemmatizer
