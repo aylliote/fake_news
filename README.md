@@ -25,10 +25,18 @@ The aim is to classify each statement (+ metadata) into one of the categories.
 - The dataset only includes the short headlines, not the full article. In my opinion lies are not so correlated to the semantic/syntaxic/stylistic/words construction of the statement, rather than the knowledge of the actual context of what it deals with. It was not allowed to use any external data for that challenge.
 - The goal is not to simply determine weither a statement is fake or not, but to classify it within one of the 6 levels of truthness, making the model able to distinguish 'False', 'Mostly false, and 'Half true' for instance.
 
-## Feature extraction
+## Model
 
-I construct the tfidf vectors obtained upon text, tfidf vectors obtained upon pos-tags (with some limitations on vocab size and up to bigrams), which leads to some very-sparse features.
+Several approaches have been tried, ordinal regression methods, under-over sampling methods to rectify classes imbalance, deep models (LSTM, CNN, DNN, but the dataset is quite small), various text processing with Spacy, ...
+
+But I finally came up with the rather simple following model, which performed best.
+
+# Feature extraction
+
+I construct the tfidf vectors obtained upon text, tfidf vectors obtained upon pos-tags (with some limitations on vocab size and up to bigrams), which leads to some very-sparse features. Those features are then embedded with some bagging ensembling methods and a logistic regression fairly penalized, as as I don't want the algorithm to overfit on some special words.
+
 I then construct some ratios with the meta-features. The strategy is to calculate the ratios n_fake_statements/n_total_statement for a given subject, editor, journalist, etc ...
+
 The ratios are then smoothed using Bayesian inference to get some more fair estimates. For instance, I'd say an editor who has published 45 fake articles over 50 total articles is more likely to publish a new fake article than an editor who publish 2 fake articles out of 2.
 This is done by fitting beta distributions on the data, see http://varianceexplained.org/r/empirical_bayes_baseball/ .
 
@@ -36,6 +44,9 @@ This allows me to avoid another sparse (one hot encoded) representation of the m
 
 Those two kinds of features are merged, along with a few other customs like the count of undefined articles, the count of numbers, ...
 
+# Learning algorithm
+
+A simple cross validated logistic regression. The problem is reduced into a binary classification form, so that the model learns to predict if the statement is in classes 0, 1, 2 or classes 3, 4, 5. This strategy has shown great improvment in the final smoothed accuracy.
 
 
 
