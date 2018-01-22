@@ -12,12 +12,15 @@ import re
 import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
+
 from .constants import *
 from .meta_vectorizer import *
 
+import inflect
+p = inflect.engine()
+
 #from nltk.sentiment.vader import SentimentIntensityAnalyzer
-#from nltk.stem.wordnet import WordNetLemmatizer
- 
  
 def bin_(x):
     """ Binarize the target to predict """
@@ -35,16 +38,21 @@ def strip_accents_unicode(s):
     s = s.decode("utf-8")
     return str(s)
 
-
+def to_singular(word, p):
+    if (nltk.pos_tag([word])[0][1] == 'PRP') or (word == 'his'): return word
+    x = p.singular_noun(word)
+    if x==False: return word
+    return x
+   
 def process(s):
     """ Simple text processing """
     punctuation = set(string.punctuation)
     punctuation.update(["``", "`", "..."])
     def clean_str(sentence):
-        #verbs_stemmer = WordNetLemmatizer()
+        verbs_stemmer = WordNetLemmatizer()
         return list((filter(lambda x: x.lower() not in punctuation and x.lower() not in english_stopwords,
-                    [t.lower() for t in word_tokenize(sentence)
-                     if t.isalpha()]))) ## verbs_stemmer.lemmatize(t.lower(),'v')
+                    [to_singular(verbs_stemmer.lemmatize(t.lower(), 'v'), p) for t in word_tokenize(sentence)
+                     if t.isalpha()]))) 
     s_ = strip_accents_unicode(s)
     s_ = s_.replace("I'm ", "I am ")
     s_ = s_.replace("It's ", "It is ")
