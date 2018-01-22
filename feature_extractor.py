@@ -119,16 +119,8 @@ class FeatureExtractor():
         df_train_meta['n_the'] = X_df.statement.apply(lambda s : count_the(strip_accents_unicode(s)))
         df_train_meta['n_the'] = (df_train_meta['n_the'] - df_train_meta['n_the'].min()) / (df_train_meta['n_the'].max() - df_train_meta['n_the'].min())
  
-        df_train_meta['is_obama'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=='Barack Obama'))
-        df_train_meta['is_clinton'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=='Bill Clinton'))
-        df_train_meta['is_brown'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=='Sherrod Brown'))
-        df_train_meta['is_portman'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Rob Portman"))
-        df_train_meta['is_kaine'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Tim Kaine"))
-        df_train_meta['is_kucinich'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Dennis Kucinich"))
-        df_train_meta['is_nelson'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Bill Nelson"))
-        df_train_meta['is_mail'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Chain email"))
-        df_train_meta['is_bloggers'] = X_df.source.apply(lambda s : int(strip_accents_unicode(s)=="Bloggers"))
-        df_train_meta['is_dccc'] = X_df.source.apply(lambda s: int(strip_accents_unicode(s)=="Democratic Congressional Campaign Committee"))
+        for f in usefull_sources:
+            df_train_meta['is_'+'_'.join(f.lower().split())] = X_df.source.apply(lambda s : int(strip_accents_unicode(s) == f))
         
         #clf = SentimentIntensityAnalyzer()
         #df_train_meta['polarity'] = X_df.statement.apply(lambda s : np.floor(np.abs(clf.polarity_scores(s)['compound'])/0.2)*0.2)
