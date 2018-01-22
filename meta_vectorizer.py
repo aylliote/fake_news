@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from .constants import *
 
-
 class MetaVectorizer:
     """ A class to vectorize the meta information that comes with the statement.
         The strategy is to calculate the ratios fake_statement/total_statements
@@ -147,38 +146,38 @@ class MetaVectorizer:
         return false_state
 
 
-    def score_journalist(s, false_journalist):
+    def score_journalist(self, s, false_journalist):
         try:
             return false_journalist.loc[false_journalist.journalist.isin(str(s).split(', ')), 'false_ind_smoothed'].mean()
         except:
             return np.nan
         
-    def score_editor(s, false_editor):
+    def score_editor(self, s, false_editor):
         try:
             return false_editor.loc[false_editor.editor.isin(str(s).split(', ')), 'false_ind_smoothed'].mean()
         except:
             return np.nan
         
-    def score_job(s, false_job):
+    def score_job(self, s, false_job):
         try:
             return float(false_job.loc[false_job['job']==s, 'false_ind_smoothed'])
         except:
             return np.nan
         
-    def score_subject(s, false_subject):
+    def score_subject(self, s, false_subject):
         try:
             return false_subject.loc[false_subject.subject.isin( \
                             re.findall(r'[A-Za-z0-9]+\'* *[A-Za-z0-9]+ *[A-Za-z0-9]+',str(s))), 'false_ind_smoothed'].mean()
         except:
             return np.nan
 
-    def score_state(s, false_state):
+    def score_state(self, s, false_state):
         try:
             return float(false_state.loc[false_state['state']==s, 'false_ind_smoothed'])
         except:
             return np.nan
         
-    def score_source(s, false_source):
+    def score_source(self, s, false_source):
         try:
             return float(false_source.loc[false_source['source']==s,'false_ind_smoothed'])
         except:
@@ -186,12 +185,12 @@ class MetaVectorizer:
         
         
     def fit(self, X_df, y):
-        self.false_source = make_source(X_df, y)
-        self.false_journalist = make_journalist(X_df, y)
-        self.false_editor = make_editor(X_df, y)
-        self.false_job = make_job(X_df, y)
-        self.false_subject = make_subject(X_df, y)
-        self.false_state = make_state(X_df, y)
+        self.false_source = self.make_source(X_df, y)
+        self.false_journalist = self.make_journalist(X_df, y)
+        self.false_editor = self.make_editor(X_df, y)
+        self.false_job = self.make_job(X_df, y)
+        self.false_subject = self.make_subject(X_df, y)
+        self.false_state = self.make_state(X_df, y)
         pass
     
     
@@ -202,12 +201,12 @@ class MetaVectorizer:
     
     def transform(self, X_df):
         _X_df = X_df.copy()
-        _X_df['journalist_likes_truth'] = _X_df['researched_by'].apply(lambda s : 1-score_journalist(s, self.false_journalist))
-        _X_df['editor_likes_truth'] = _X_df['edited_by'].apply(lambda s : 1-score_editor(s, self.false_editor))
-        _X_df['job_prone_truth'] = _X_df['job'].apply(lambda s : 1-score_job(s, self.false_job))
-        _X_df['subject_prone_truth'] = _X_df['subjects'].apply(lambda s : 1-score_subject(s, self.false_subject))
-        _X_df['state_prone_truth'] = _X_df['state'].apply(lambda s : 1-score_state(s, self.false_state))
-        _X_df['source_reliable'] = _X_df['source'].apply(lambda s : 1-score_source(s, self.false_source))      
+        _X_df['journalist_likes_truth'] = _X_df['researched_by'].apply(lambda s : 1-self.score_journalist(s, self.false_journalist))
+        _X_df['editor_likes_truth'] = _X_df['edited_by'].apply(lambda s : 1-self.score_editor(s, self.false_editor))
+        _X_df['job_prone_truth'] = _X_df['job'].apply(lambda s : 1-self.score_job(s, self.false_job))
+        _X_df['subject_prone_truth'] = _X_df['subjects'].apply(lambda s : 1-self.score_subject(s, self.false_subject))
+        _X_df['state_prone_truth'] = _X_df['state'].apply(lambda s : 1-self.score_state(s, self.false_state))
+        _X_df['source_reliable'] = _X_df['source'].apply(lambda s : 1-self.score_source(s, self.false_source))      
         _X_df = X_df.loc[:, meta_features]
         for f in X_df_.columns:
             X_df_[f] = X_df_[f].fillna(value= X_df_[f].median())
